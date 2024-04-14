@@ -32,7 +32,7 @@ pipeline {
         stage('Docker Build')
         {
             steps{
-               docker build -t webapp -f ./Devops_deploy/Dockerfile ./Devops_deploy/
+              sh 'docker build -t webapp -f ./Devops_deploy/Dockerfile ./Devops_deploy/'
             }
         }
         stage('Docker Run')
