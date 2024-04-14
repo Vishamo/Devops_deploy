@@ -32,14 +32,14 @@ pipeline {
         stage('Docker Build')
         {
             steps{
-              sh 'docker build -t webapp -f ./Devops_deploy/Dockerfile ./Devops_deploy/'
+              sh 'docker build -t dotnet -f ./Devops_deploy/Dockerfile ./Devops_deploy/'
             }
         }
         stage('Docker Run')
         {
             steps {
                 script {
-                    docker.image('webapp').run("-d -p 8085:80")
+                    docker.image('dotnet').run("-d -p 8085:80")
                 }
             }
         }
