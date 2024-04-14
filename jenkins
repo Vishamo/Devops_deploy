@@ -1,60 +1,98 @@
-pipeline {
-    agent any
+// pipeline {
+//     agent any
 
-    stages {
-        stage('Checkout') {
-            steps {
-                // Checkout source code from Git repository
+//     stages {
+//         stage('Checkout') {
+//             steps {
+//                 // Checkout source code from Git repository
+//                 checkout scm
+//             }
+//         }
+
+//         stage('Restore') {
+//             steps {
+//                 // Restore NuGet packages
+//                 sh 'dotnet restore'
+//             }
+//         }
+
+//         stage('Build') {
+//             steps {
+//                 // Build the project
+//                sh 'dotnet build ./Devops_deploy/Devops_deploy.csproj --configuration Release'
+//             }
+//         }
+
+//         stage('Test') {
+//             steps {
+//                 // Run unit tests
+//                 sh 'dotnet test --configuration Release'
+//             }
+//         }
+//         stage('Docker Build')
+//         {
+//             steps{
+//               sh 'docker build -t dotnet -f ./Devops_deploy/Dockerfile ./Devops_deploy/'
+//             }
+//         }
+//         stage('Docker Run')
+//         {
+//             steps {
+//                 script {
+//                     docker.image('dotnet').run("-d -p 8085:80")
+//                 }
+//             }
+//         }
+
+       
+//     }
+
+//     post {
+        
+//         success {
+//             echo 'Build and test succeeded! Deployed your application "Webapp".'
+//         }
+
+//         failure {
+//             echo 'Build or test or Deployment failed! Investigate and fix the issues.'
+//         }
+//     }
+// }
+
+
+pipeline{
+    agent any
+    environment{
+        PATH = "/opt/sonar-scanner/bin:${env.PATH}"
+    }
+    stages{
+        stage('Checkout'){
+            steps{
                 checkout scm
             }
         }
-
-        stage('Restore') {
-            steps {
-                // Restore NuGet packages
-                sh 'dotnet restore'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                // Build the project
-               sh 'dotnet build ./Devops_deploy/Devops_deploy.csproj --configuration Release'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                // Run unit tests
-                sh 'dotnet test --configuration Release'
-            }
-        }
-        stage('Docker Build')
-        {
+        stage('Build'){
             steps{
-              sh 'docker build -t dotnet -f ./Devops_deploy/Dockerfile ./Devops_deploy/'
-            }
-        }
-        stage('Docker Run')
-        {
-            steps {
                 script {
-                    docker.image('dotnet').run("-d -p 8085:80")
+                    docker.build('devops:latest')
                 }
             }
         }
-
-       
-    }
-
-    post {
-        
-        success {
-            echo 'Build and test succeeded! Deployed your application "Webapp".'
+        stage('Sonar'){
+            steps{
+                script{
+                    sh "sonar-scanner -Dsonar.projectKey=devops_sample -Dsonar.login=squ_3bfb2012faf2265d268097ac170b31605d74fd19"
+                    //withSonarQubeEnv('satsonar'){
+                    //}
+                }
+            }
         }
-
-        failure {
-            echo 'Build or test or Deployment failed! Investigate and fix the issues.'
+        stage('deploy'){
+            steps{
+                script{
+                    docker.image('devops:latest').run('-p 7216:80 -d')
+                }
+            }
         }
     }
 }
