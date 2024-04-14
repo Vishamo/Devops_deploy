@@ -37,8 +37,10 @@ pipeline {
         }
         stage('Docker Run')
         {
-            steps{
-                docker run -d -p 8080:80 webapp
+            steps {
+                script {
+                    docker.image('webapp').run("-d -p 8080:80")
+                }
             }
         }
 
