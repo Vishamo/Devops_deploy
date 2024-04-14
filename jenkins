@@ -32,7 +32,13 @@ pipeline {
         stage('Docker Build')
         {
             steps{
-               docker build -t your-image-name .
+               docker build -t webapp -f ./Devops_deploy/Dockerfile ./Devops_deploy/
+            }
+        }
+        stage('Docker Run')
+        {
+            steps{
+                docker run -d -p 8080:80 webapp
             }
         }
 
@@ -42,11 +48,11 @@ pipeline {
     post {
         
         success {
-            echo 'Build and test succeeded! Deploy your application.'
+            echo 'Build and test succeeded! Deployed your application "Webapp".'
         }
 
         failure {
-            echo 'Build or test failed! Investigate and fix the issues.'
+            echo 'Build or test or Deployment failed! Investigate and fix the issues.'
         }
     }
 }
